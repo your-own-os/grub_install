@@ -737,15 +737,8 @@ class _Efi:
     """We only support removable, and not upgrading NVRAM"""
 
     @staticmethod
-    def fill_platform_install_info(platform_type, platform_install_info, target_type, rootfsDir, bootDir):
-        efiDirRootfs = os.path.join(rootfsDir, "EFI")
-        efiDirBoot = os.path.join(bootDir, "EFI")
-        if os.path.exists(efiDirRootfs):
-            if os.path.exists(efiDirBoot):
-                raise TargetError("both %s and %s exist" % (efiDirRootfs, efiDirBoot))
-            efiDir = efiDirRootfs
-        else:
-            efiDir = efiDirBoot
+    def fill_platform_install_info(platform_type, platform_install_info, target_type, bootDir):
+        efiDir = os.path.join(bootDir, "EFI")
 
         coreFullfn = os.path.join(bootDir, "grub", platform_type.value, Grub.getCoreImgNameAndTarget(platform_type)[0])
         efiFullfn = os.path.join(efiDir, "BOOT", Handy.getStandardEfiFilename(platform_type))
