@@ -252,7 +252,7 @@ class Target:
             force_mkdir(dstDir, clear=True)
             if themes == "*":
                 for tname, fullfn in source.get_all_theme_directories().items():
-                    shutil.copytree(fullfn, os.path.join(dstDir, os.path.basename(tname)))
+                    shutil.copytree(fullfn, os.path.join(dstDir, tname))
             else:
                 for tname in themes:
                     shutil.copytree(source.get_theme_directory(tname), dstDir)
