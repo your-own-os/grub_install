@@ -251,7 +251,7 @@ class Target:
             dstDir = os.path.join(grubDir, "themes")
             force_mkdir(dstDir, clear=True)
             if themes == "*":
-                for tname, fullfn in source.get_all_theme_directories():
+                for tname, fullfn in source.get_all_theme_directories().items():
                     shutil.copytree(fullfn, dstDir)
             else:
                 for tname in themes:
