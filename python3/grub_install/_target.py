@@ -342,9 +342,6 @@ class _Common:
         # get module list and hints
         moduleList, hints = Grub.getModuleListAndHnits(platform_type, p._mnt)
 
-        # create boot directory if neccessary
-        os.makedirs(p._bootDir, exist_ok=True)
-
         # install module files
         # FIXME: install only required modules
         if True:
