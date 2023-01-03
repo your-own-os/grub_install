@@ -59,6 +59,8 @@ class Target:
                     raise TargetError("%s does not exist" % (self._bootDir))
             else:
                 assert False
+            if self._mnt.fs_uuid is None:
+                raise TargetError("no fsuuid found")
         elif self._targetType == TargetType.PYCDLIB_OBJ:
             assert self._mode in [TargetAccessMode.R, TargetAccessMode.W]
             self._iso = kwargs.get["obj"]
@@ -331,12 +333,11 @@ class _Common:
 
     @staticmethod
     def install_platform(p, platform_type, source, tmpDir=None, debugImage=None):
+        assert p._mnt.fs_uuid is not None
+
         grubDir = os.path.join(p._bootDir, "grub")
         platDirSrc = source.get_platform_directory(platform_type)
         platDirDst = os.path.join(grubDir, platform_type.value)
-
-        if p._mnt.fs_uuid is None:
-            raise InstallError("no fsuuid found")
 
         # get module list and hints
         moduleList, hints = Grub.getModuleListAndHnits(platform_type, p._mnt)
