@@ -47,14 +47,16 @@ class Target:
 
         # target specific variables
         if self._targetType == TargetType.MOUNTED_HDD_DEV:
-            rootfsMnt = kwargs.get("rootfs_mount_point", None)
-            bootMnt = kwargs.get("boot_mount_point", None)
-            if bootMnt is not None:
-                self._mnt = GrubMountPoint(bootMnt, False)
+            if "boot_mount_point" in kwargs:
+                if "rootfs_mount_point" in kwargs:
+                    assert os.path.join(kwargs["rootfs_mount_point"].mountpoint, "boot") == kwargs["boot_mount_point"].mountpoint
+                self._mnt = GrubMountPoint(kwargs["boot_mount_point"], False)
                 self._bootDir = self._mnt.mountpoint
-            elif rootfsMnt is not None:
-                self._mnt = GrubMountPoint(rootfsMnt, True)
+            elif "rootfs_mount_point" in kwargs:
+                self._mnt = GrubMountPoint(kwargs["rootfs_mount_point"], True)
                 self._bootDir = os.path.join(self._mnt.mountpoint, "boot")
+                if not os.path.exists(self._bootDir):
+                    raise TargetError("%s does not exist" % (self._bootDir))
             else:
                 assert False
         elif self._targetType == TargetType.PYCDLIB_OBJ:
