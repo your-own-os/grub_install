@@ -137,18 +137,25 @@ class Target:
         ret.status = PlatformInstallInfo.Status.NORMAL
 
         if self._targetType == TargetType.MOUNTED_HDD_DEV:
-            _Common.install_platform(self, platform_type, source,
-                                     tmpDir=self._tmpDir,
-                                     debugImage=kwargs.get("debug_image", None))
             if platform_type == PlatformType.I386_PC:
+                _Common.install_platform(self, platform_type, source,
+                                         tmpDir=self._tmpDir,
+                                         debugImage=kwargs.get("debug_image", None))
                 _Bios.install_with_mbr(platform_type, ret, source, self._bootDir, self._mnt.disk,
                                        False,                                                           # bFloppyOrHdd
                                        kwargs.get("allow_floppy", False),                               # bAllowFloppy
                                        kwargs.get("bpb", True),                                         # bBpb
                                        kwargs.get("rs_codes", True))                                    # bAddRsCodes
             elif Handy.isPlatformEfi(platform_type):
+                bUseRootfsAsEsp = kwargs.get("use_rootfs_as_esp", False)
+                assert (bUseRootfsAsEsp and not self._mnt.is_boot_mount_point()) or (not bUseRootfsAsEsp and self._mnt.is_boot_mount_point())
+                if self._mnt.grub_fs != "fat":
+                    raise InstallError("%s must be fat filesystem" % (self._mnt.mountpoint))
+                _Common.install_platform(self, platform_type, source,
+                                         tmpDir=self._tmpDir,
+                                         debugImage=kwargs.get("debug_image", None))
                 _Efi.install_info_efi_dir(platform_type, ret, self._mnt.mountpoint, self._bootDir,
-                                          kwargs.get("use_rootfs_as_esp", False),                       # bUseRootfsAsEsp
+                                          bUseRootfsAsEsp,                                              # bUseRootfsAsEsp
                                           kwargs.get("removable", False),                               # bRemovable
                                           kwargs.get("update_nvram", True))                             # bUpdateNvram
             else:
@@ -164,6 +171,7 @@ class Target:
                 _Bios.install_without_mbr(platform_type, ret, source, self._bootDir)
             elif Handy.isPlatformEfi(platform_type):
                 _Efi.install_info_efi_dir(platform_type, ret, self._dir, self._bootDir,
+                                          False,                                                        # bUseRootfsAsEsp  FIXME
                                           kwargs.get("removable", False),                               # bRemovable
                                           False)                                                        # bUpdateNvram
             else:
@@ -328,8 +336,6 @@ class _Common:
 
         if p._mnt.fs_uuid is None:
             raise InstallError("no fsuuid found")
-        if Handy.isPlatformEfi(platform_type) and (not p._mnt.is_boot_mount_point() or p._mnt.grub_fs != "fat"):
-            raise InstallError("%s doesn't look like an EFI partition" % (p._bootDir))
 
         # get module list and hints
         moduleList, hints = Grub.getModuleListAndHnits(platform_type, p._mnt)
