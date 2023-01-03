@@ -56,7 +56,7 @@ class Target:
                 self._mnt = GrubMountPoint(kwargs["rootfs_mount_point"], True)
                 self._bootDir = os.path.join(self._mnt.mountpoint, "boot")
                 if not os.path.exists(self._bootDir):
-                    raise TargetError("%s does not exist" % (self._bootDir))
+                    raise TargetError("boot directory \"%s\" does not exist" % (self._bootDir))
             else:
                 assert False
             if self._mnt.fs_uuid is None:
