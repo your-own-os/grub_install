@@ -47,13 +47,15 @@ class Target:
 
         # target specific variables
         if self._targetType == TargetType.MOUNTED_HDD_DEV:
-            if "boot_mount_point" in kwargs:
-                if "rootfs_mount_point" in kwargs:
-                    assert os.path.join(kwargs["rootfs_mount_point"].mountpoint, "boot") == kwargs["boot_mount_point"].mountpoint
-                self._mnt = GrubMountPoint(kwargs["boot_mount_point"], False)
+            rootfsMnt = kwargs.get("rootfs_mount_point", None)
+            bootMnt = kwargs.get("boot_mount_point", None)
+            if bootMnt is not None:
+                if rootfsMnt is not None:
+                    assert os.path.join(rootfsMnt.mountpoint, "boot") == bootMnt.mountpoint
+                self._mnt = GrubMountPoint(bootMnt, False)
                 self._bootDir = self._mnt.mountpoint
-            elif "rootfs_mount_point" in kwargs:
-                self._mnt = GrubMountPoint(kwargs["rootfs_mount_point"], True)
+            elif rootfsMnt is not None:
+                self._mnt = GrubMountPoint(rootfsMnt, True)
                 self._bootDir = os.path.join(self._mnt.mountpoint, "boot")
                 if not os.path.exists(self._bootDir):
                     raise TargetError("boot directory \"%s\" does not exist" % (self._bootDir))
@@ -739,7 +741,6 @@ class _Efi:
     @staticmethod
     def fill_platform_install_info(platform_type, platform_install_info, target_type, bootDir):
         efiDir = os.path.join(bootDir, "EFI")
-
         coreFullfn = os.path.join(bootDir, "grub", platform_type.value, Grub.getCoreImgNameAndTarget(platform_type)[0])
         efiFullfn = os.path.join(efiDir, "BOOT", Handy.getStandardEfiFilename(platform_type))
 
