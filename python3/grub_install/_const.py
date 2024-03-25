@@ -55,10 +55,10 @@ class PlatformType(enum.Enum):
     POWERPC_IEEE1275 = "powerpc-ieee1275"
     SPARC64_IEEE1275 = "sparc64-ieee1275"
     MIPS_ARC = "mips-arc"
-    MIPS_QEMU_MIPS = enum.auto()                            # FIXME
+    MIPS_QEMU_MIPS = "mips_qemu-mips"           # FIXME
     MIPSEL_ARC = "mipsel-arc"
     MIPSEL_LOONGSON = "mipsel-loongson"
-    MIPSEL_QEMU_MIPS = enum.auto()                          # FIXME
+    MIPSEL_QEMU_MIPS = "mipsel_qemu-mips"       # FIXME
     RISCV32_EFI = "riscv32-efi"
     RISCV64_EFI = "riscv64-efi"
 
