@@ -67,6 +67,9 @@ class GrubEnvFile:
             self._bNeedSave = True
 
     def save(self):
+        if not self._bNeedSave:
+            return
+
         with open(self._path, "w") as f:
             count = 0
             if True:
