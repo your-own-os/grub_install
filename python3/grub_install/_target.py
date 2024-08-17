@@ -814,14 +814,8 @@ def _newNotInstalledPlatformInstallInfo():
 #     @staticmethod
 #     def install_platform_for_iso(platform_type, source, bootDir, dev, bHddOrFloppy, bInstallMbr):
 
-#         if
-
-
-
 #         char *output = grub_util_path_concat (3, boot_grub, "i386-pc", "eltorito.img");
 #       load_cfg = grub_util_make_temporary_file ();
-
-
 
 #       grub_install_push_module ("biosdisk");
 #       grub_install_push_module ("iso9660");

@@ -44,6 +44,9 @@ from ._source import Source
 
 from ._target import Target
 
+from ._misc import GrubEnvFile
+from ._misc import GrubCfgFile
+
 from ._errors import SourceError
 from ._errors import TargetError
 from ._errors import InstallError
