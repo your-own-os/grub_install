@@ -45,6 +45,12 @@ class GrubEnvFile:
     def is_saved(self):
         return not self._bNeedSave
 
+    def has_env(self, name):
+        return name in self._envDict
+
+    def get_env(self, name):
+        return self._envDict[name]
+
     def reset(self):
         if len(self._envDict) > 0:
             self._envDict.clear()
