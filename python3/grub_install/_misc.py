@@ -122,7 +122,32 @@ class GrubCfgFile:
 
     def __init__(self, bootDir):
         self._path = os.path.join(bootDir, "grub", "grub.cfg")
+        try:
+            self._content = pathlib.Path(self._path).read_text()
+            self._bNeedSave = False
+        except FileNotFoundError:
+            self._content = ""
+            self._bNeedSave = True
 
     @property
     def path(self):
         return self._path
+
+    def is_saved(self):
+        return not self._bNeedSave
+
+    def get_content(self):
+        return self._content
+
+    def set_content(self, content):
+        if self._content != content:
+            self._content = content
+            self._bNeedSave = True
+
+    def save(self):
+        if not self._bNeedSave:
+            return
+
+        with open(self._path, "w") as f:
+            f.write(self._content)
+        self._bNeedSave = False
