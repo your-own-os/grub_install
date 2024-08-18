@@ -82,7 +82,7 @@ class GrubEnvFile:
                 f.write("%s=%s\n" % (name, value))
                 count += len(name) + 1 + len(value) + 1
             if count < self._MIN_SIZE:
-                f.write("#" * self._MIN_SIZE - count)
+                f.write("#" * (self._MIN_SIZE - count))
         self._bNeedSave = False
 
     def _parse(self):
