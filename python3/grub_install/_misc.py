@@ -43,7 +43,12 @@ class GrubEnvFile:
         return self._path
 
     def is_saved(self):
-        return not self._bNeedSave
+        if self._bNeedSave:
+            return False
+        if not os.path.exists(self._path):
+            return False
+        # FIXME: should record and compare file mtime, so we can also know file is changed by others
+        return True
 
     def has_env(self, name):
         return name in self._envDict
@@ -67,7 +72,7 @@ class GrubEnvFile:
             self._bNeedSave = True
 
     def save(self):
-        if not self._bNeedSave:
+        if self.is_saved():
             return
 
         with open(self._path, "w") as f:
@@ -134,7 +139,12 @@ class GrubCfgFile:
         return self._path
 
     def is_saved(self):
-        return not self._bNeedSave
+        if self._bNeedSave:
+            return False
+        if not os.path.exists(self._path):
+            return False
+        # FIXME: should record and compare file mtime, so we can also know file is changed by others
+        return True
 
     def get_content(self):
         return self._content
@@ -145,7 +155,7 @@ class GrubCfgFile:
             self._bNeedSave = True
 
     def save(self):
-        if not self._bNeedSave:
+        if self.is_saved():
             return
 
         with open(self._path, "w") as f:
