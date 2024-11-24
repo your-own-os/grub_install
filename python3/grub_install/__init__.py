@@ -39,11 +39,11 @@ from ._const import TargetType
 from ._const import TargetAccessMode
 from ._const import PlatformType
 from ._const import PlatformInstallInfo
+from ._const import RootfsOrBootMountPoint
 
 from ._source import Source
 
 from ._target import Target
-from ._target import RootfsOrBootMountPoint
 
 from ._misc import GrubEnvFile
 from ._misc import GrubCfgFile
