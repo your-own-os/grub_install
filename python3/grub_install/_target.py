@@ -48,14 +48,18 @@ class Target:
         # target specific variables
         if self._targetType == TargetType.MOUNTED_HDD_DEV:
             rootfsMnt = kwargs.get("rootfs_mount_point", None)
+            if rootfsMnt is not None:
+                assert rootfsMnt.is_rootfs_mount_point()
             bootMnt = kwargs.get("boot_mount_point", None)
+            if bootMnt is not None:
+                assert bootMnt.is_boot_mount_point()
             if bootMnt is not None:
                 if rootfsMnt is not None:
                     assert os.path.join(rootfsMnt.mountpoint, "boot") == bootMnt.mountpoint
-                self._mnt = GrubMountPoint(bootMnt, False)
+                self._mnt = GrubMountPoint(bootMnt)
                 self._bootDir = self._mnt.mountpoint
             elif rootfsMnt is not None:
-                self._mnt = GrubMountPoint(rootfsMnt, True)
+                self._mnt = GrubMountPoint(rootfsMnt)
                 self._bootDir = os.path.join(self._mnt.mountpoint, "boot")
                 if not os.path.exists(self._bootDir):
                     raise TargetError("boot directory \"%s\" does not exist" % (self._bootDir))

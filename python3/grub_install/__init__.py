@@ -43,6 +43,7 @@ from ._const import PlatformInstallInfo
 from ._source import Source
 
 from ._target import Target
+from ._target import RootfsOrBootMountPoint
 
 from ._misc import GrubEnvFile
 from ._misc import GrubCfgFile

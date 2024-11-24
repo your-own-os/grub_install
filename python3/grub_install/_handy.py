@@ -26,7 +26,7 @@ import pathlib
 import tempfile
 import subprocess
 from ._util import PartiUtil
-from ._const import PlatformType
+from ._const import PlatformType, RootfsOrBootMountPoint
 
 
 class Handy:
@@ -268,9 +268,11 @@ class Grub:
         return in_str.replace('\'', "'\\''")
 
 
-class GrubMountPoint:
+class GrubMountPoint(RootfsOrBootMountPoint):
 
-    def __init__(self, p, rootfs_or_boot):
+    def __init__(self, p):
+        assert p.is_rootfs_mount_point() != p.is_boot_mount_point()
+
         self._p = p
 
         def __getGrub(key):
@@ -279,40 +281,38 @@ class GrubMountPoint:
             except subprocess.CalledProcessError:
                 return None
 
-        # FIXME: what if filesystem is on raw block device
-        self.disk = PartiUtil.partiToDisk(self._p.device)
+        self._fs_uuid = __getGrub("fs_uuid")
 
-        self.fs_uuid = __getGrub("fs_uuid")
-
-        self.grub_fs = __getGrub("fs")
+        self._grub_fs = __getGrub("fs")
 
         # FIXME: what if filesystem is on raw block device
-        self.grub_partmap = __getGrub("partmap")
+        self._grub_partmap = __getGrub("partmap")
 
-        self.grub_bios_hints = __getGrub("bios_hints")
+        self._grub_bios_hints = __getGrub("bios_hints")
 
-        self.grub_efi_hints = __getGrub("efi_hints")
-
-        self._rootfs_or_boot = rootfs_or_boot
+        self._grub_efi_hints = __getGrub("efi_hints")
 
     @property
-    def device(self):
-        return self._p.device
+    def fs_uuid(self):
+        return self._fs_uuid
 
     @property
-    def mountpoint(self):
-        return self._p.mountpoint
+    def grub_fs(self):
+        return self._grub_fs
 
     @property
-    def fstype(self):
-        return self._p.fstype
+    def grub_partmap(self):
+        return self._grub_partmap
 
     @property
-    def opts(self):
-        return self._p.opts
+    def grub_bios_hints(self):
+        return self._grub_bios_hints
 
-    def is_rootfs_mount_point(self):
-        return self._rootfs_or_boot
+    @property
+    def grub_efi_hints(self):
+        return self._grub_efi_hints
 
-    def is_boot_mount_point(self):
-        return not self._rootfs_or_boot
+    def __getattr__(self, attr):
+        if self._p is not None:
+            return getattr(self._p, attr)
+        raise AttributeError(f"'{self.__class__.name}' object has no attribute '{attr}'")       # ugly, from PEP-562, a string which is same as system error message
