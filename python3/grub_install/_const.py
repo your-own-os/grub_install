@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 
-import abc
 import enum
 
 
@@ -80,38 +79,41 @@ class PlatformInstallInfo:
 
 class RootfsOrBootMountPoint:
 
+    def __init__(self, disk, partition, mountpoint, fstype, opts, rootfs_or_boot):
+        assert disk != partition
+
+        self._disk = disk
+        self._partition = partition
+        self._mountpoint = mountpoint
+        self._fstype = fstype
+        self._opts = opts
+        self._rootfsOrBoot = rootfs_or_boot
+
     @property
-    @abc.abstractmethod
     def disk(self):
-        pass
+        return self._disk
 
     @property
-    @abc.abstractmethod
-    def device(self):
-        pass
+    def partition(self):
+        return self._partition
 
     @property
-    @abc.abstractmethod
     def mountpoint(self):
-        pass
+        return self._mountpoint
 
     @property
-    @abc.abstractmethod
     def fstype(self):
-        pass
+        return self._fstype
 
     @property
-    @abc.abstractmethod
     def opts(self):
-        pass
+        return self._opts
 
-    @abc.abstractmethod
     def is_rootfs_mount_point(self):
-        pass
+        return self._rootfsOrBoot
 
-    @abc.abstractmethod
     def is_boot_mount_point(self):
-        pass
+        return not self._rootfsOrBoot
 
 
 #    MOUNTED_FDD_DEV = enum.auto()            # floppy device

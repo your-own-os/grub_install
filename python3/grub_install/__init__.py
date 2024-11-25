@@ -53,3 +53,21 @@ from ._errors import TargetError
 from ._errors import InstallError
 from ._errors import CopySourceError
 from ._errors import CompareWithSourceError
+
+
+__all__ = [
+    "TargetType",
+    "TargetAccessMode",
+    "PlatformType",
+    "PlatformInstallInfo",
+    "RootfsOrBootMountPoint",
+    "Source",
+    "Target",
+    "GrubEnvFile",
+    "GrubCfgFile",
+    "SourceError",
+    "TargetError",
+    "InstallError",
+    "CopySourceError",
+    "CompareWithSourceError",
+]

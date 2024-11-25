@@ -25,7 +25,6 @@ import os
 import pathlib
 import tempfile
 import subprocess
-from ._util import PartiUtil
 from ._const import PlatformType, RootfsOrBootMountPoint
 
 
@@ -268,16 +267,16 @@ class Grub:
         return in_str.replace('\'', "'\\''")
 
 
-class GrubMountPoint(RootfsOrBootMountPoint):
+class GrubMountPoint:
 
     def __init__(self, p):
-        assert p.is_rootfs_mount_point() != p.is_boot_mount_point()
+        assert isinstance(p, RootfsOrBootMountPoint)
 
         self._p = p
 
         def __getGrub(key):
             try:
-                return subprocess.check_output(["grub-probe", "-t", key, "-d", self._p.device], universal_newlines=True).rstrip("\n")
+                return subprocess.check_output(["grub-probe", "-t", key, "-d", self._p.partition], universal_newlines=True).rstrip("\n")
             except subprocess.CalledProcessError:
                 return None
 

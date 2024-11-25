@@ -854,19 +854,8 @@ def _newNotInstalledPlatformInstallInfo():
 #   make_image_fwdisk (GRUB_INSTALL_PLATFORM_SPARC64_IEEE1275,
 #          "sparc64-ieee1275-cdcore", "sparc64-ieee1275/core.img");
 
-
-
-
-
-
 # self.pubkey = XXX         # --pubkey=FILE
 # self.compress = XXX       # --compress=no|xz|gz|lzo
-
-
-
-
-
-
 
 # ia64-efi
 
