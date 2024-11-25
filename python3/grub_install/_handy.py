@@ -25,7 +25,7 @@ import os
 import pathlib
 import tempfile
 import subprocess
-from ._const import PlatformType, RootfsOrBootMountPoint
+from ._const import PlatformType, RootfsPartitionOrBootPartitionMountPoint
 
 
 class Handy:
@@ -270,7 +270,7 @@ class Grub:
 class GrubMountPoint:
 
     def __init__(self, p):
-        assert isinstance(p, RootfsOrBootMountPoint)
+        assert isinstance(p, RootfsPartitionOrBootPartitionMountPoint)
 
         self._p = p
 

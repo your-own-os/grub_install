@@ -39,7 +39,7 @@ from ._const import TargetType
 from ._const import TargetAccessMode
 from ._const import PlatformType
 from ._const import PlatformInstallInfo
-from ._const import RootfsOrBootMountPoint
+from ._const import RootfsPartitionOrBootPartitionMountPoint
 
 from ._source import Source
 
@@ -60,7 +60,7 @@ __all__ = [
     "TargetAccessMode",
     "PlatformType",
     "PlatformInstallInfo",
-    "RootfsOrBootMountPoint",
+    "RootfsPartitionOrBootPartitionMountPoint",
     "Source",
     "Target",
     "GrubEnvFile",

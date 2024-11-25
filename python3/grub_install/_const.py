@@ -77,9 +77,9 @@ class PlatformInstallInfo:
         return "<%s %r>" % (self.__class__.__name__, self.__dict__)
 
 
-class RootfsOrBootMountPoint:
+class RootfsPartitionOrBootPartitionMountPoint:
 
-    def __init__(self, disk, partition, mountpoint, fstype, opts, rootfs_or_boot):
+    def __init__(self, disk, partition, mountpoint, fstype, opts, rootfs_partition_or_boot_partition):
         assert disk != partition
 
         self._disk = disk
@@ -87,7 +87,7 @@ class RootfsOrBootMountPoint:
         self._mountpoint = mountpoint
         self._fstype = fstype
         self._opts = opts
-        self._rootfsOrBoot = rootfs_or_boot
+        self._rootfsOrBoot = rootfs_partition_or_boot_partition
 
     @property
     def disk(self):
