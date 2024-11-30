@@ -28,7 +28,7 @@ import struct
 import parted
 import pathlib
 import reedsolo
-from ._util import rel_path, force_rm, force_mkdir, rmdir_if_empty, compare_file_and_content, compare_files, compare_directories, is_buffer_all_zero, PartiUtil
+from ._util import rel_path, force_rm, force_mkdir, rmdir_if_empty, shutil_copy_robust, compare_file_and_content, compare_files, compare_directories, is_buffer_all_zero, PartiUtil
 from ._const import TargetType, TargetAccessMode, PlatformType, PlatformInstallInfo
 from ._errors import TargetError, InstallError, CompareWithSourceError
 from ._handy import Handy, Grub, GrubMountPoint
@@ -241,30 +241,30 @@ class Target:
             force_mkdir(dstDir, clear=True)
             if locales == "*":
                 for lname, fullfn in source.get_all_locale_files().items():
-                    shutil.copy(fullfn, os.path.join(dstDir, "%s.mo" % (lname)))
+                    shutil_copy_robust(fullfn, os.path.join(dstDir, "%s.mo" % (lname)))
             else:
                 for lname in locales:
-                    shutil.copy(source.get_locale_file(lname), "%s.mo" % (lname))
+                    shutil_copy_robust(source.get_locale_file(lname), "%s.mo" % (lname))
 
         if fonts is not None:
             dstDir = os.path.join(grubDir, "fonts")
             force_mkdir(dstDir, clear=True)
             if fonts == "*":
                 for fname, fullfn in source.get_all_font_files().items():
-                    shutil.copy(fullfn, dstDir)
+                    shutil_copy_robust(fullfn, dstDir)
             else:
                 for fname in fonts:
-                    shutil.copy(source.get_font_file(fname), dstDir)
+                    shutil_copy_robust(source.get_font_file(fname), dstDir)
 
         if themes is not None:
             dstDir = os.path.join(grubDir, "themes")
             force_mkdir(dstDir, clear=True)
             if themes == "*":
                 for tname, fullfn in source.get_all_theme_directories().items():
-                    shutil.copytree(fullfn, os.path.join(dstDir, tname))
+                    shutil.copytree(fullfn, os.path.join(dstDir, tname), copy_function=shutil_copy_robust)
             else:
                 for tname in themes:
-                    shutil.copytree(source.get_theme_directory(tname), dstDir)
+                    shutil.copytree(source.get_theme_directory(tname), dstDir, copy_function=shutil_copy_robust)
 
     def remove_data_files(self):
         assert self._mode in [TargetAccessMode.RW, TargetAccessMode.W]
@@ -356,7 +356,7 @@ class _Common:
 
             def __copy(fullfn, dstDir):
                 # FIXME: specify owner, group, mode?
-                shutil.copy(fullfn, platDirDst)
+                shutil_copy_robust(fullfn, platDirDst)
 
             # copy module files
             for fullfn in glob.glob(os.path.join(platDirSrc, "*.mod")):
@@ -561,7 +561,7 @@ class _Bios:
     @classmethod
     def install_without_mbr(cls, platform_type, platform_install_info, source, bootDir):
         # copy boot.img
-        shutil.copy(os.path.join(source.get_platform_directory(platform_type), "boot.img"), os.path.join(bootDir, "grub", platform_type.value))
+        shutil_copy_robust(os.path.join(source.get_platform_directory(platform_type), "boot.img"), os.path.join(bootDir, "grub", platform_type.value))
 
         # fill custom attributes
         platform_install_info.mbr_installed = False
@@ -574,7 +574,7 @@ class _Bios:
         assert not bFloppyOrHdd and not bAllowFloppy        # FIXME
 
         # copy boot.img
-        shutil.copy(os.path.join(source.get_platform_directory(platform_type), "boot.img"), os.path.join(bootDir, "grub", platform_type.value))
+        shutil_copy_robust(os.path.join(source.get_platform_directory(platform_type), "boot.img"), os.path.join(bootDir, "grub", platform_type.value))
 
         bootBuf = bytearray(cls._checkAndReadBootImg(platform_type, bootDir, InstallError))     # bootBuf needs to be writable
         coreBuf = cls._checkAndReadCoreImg(platform_type, bootDir, InstallError)
@@ -775,7 +775,7 @@ class _Efi:
 
         # copy efi file
         coreName = Grub.getCoreImgNameAndTarget(platform_type)[0]
-        shutil.copy(os.path.join(grubPlatDir, coreName), os.path.join(efiDirLv2, efiFn))
+        shutil_copy_robust(os.path.join(grubPlatDir, coreName), os.path.join(efiDirLv2, efiFn))
 
         # fill custom attributes
         platform_install_info.removable = bRemovable

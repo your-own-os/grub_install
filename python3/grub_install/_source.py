@@ -24,7 +24,7 @@
 import os
 import glob
 import shutil
-from ._util import rel_path, compare_files, compare_directories
+from ._util import rel_path, shutil_copy_robust, compare_files, compare_directories
 from ._const import PlatformType
 from ._errors import SourceError, CopySourceError
 
@@ -172,7 +172,7 @@ class Source:
                 if not compare_directories(fullfn, fullfn2):
                     raise CopySourceError("%s and %s are different" % (fullfn, fullfn2))
             else:
-                shutil.copytree(fullfn, fullfn2)
+                shutil.copytree(fullfn, fullfn2, copy_function=shutil_copy_robust)
 
         # copy locale files
         if self.supports(self.CAP_NLS):
@@ -185,7 +185,7 @@ class Source:
                         raise CopySourceError("%s and %s are different" % (fullfn, fullfn2))
                 else:
                     os.makedirs(os.path.dirname(fullfn2), exist_ok=True)
-                    shutil.copy(fullfn, fullfn2)
+                    shutil_copy_robust(fullfn, fullfn2)
 
         # copy font files
         if self.supports(self.CAP_FONTS):
@@ -197,7 +197,7 @@ class Source:
                     if not compare_files(fullfn, fullfn2):
                         raise CopySourceError("%s and %s are different" % (fullfn, fullfn2))
                 else:
-                    shutil.copy(fullfn, fullfn2)
+                    shutil_copy_robust(fullfn, fullfn2)
 
         # copy theme directories
         if self.supports(self.CAP_THEMES):
@@ -209,4 +209,4 @@ class Source:
                     if not compare_directories(fullfn, fullfn2):
                         raise CopySourceError("%s and %s are different" % (fullfn, fullfn2))
                 else:
-                    shutil.copytree(fullfn, fullfn2)
+                    shutil.copytree(fullfn, fullfn2, copy_function=shutil_copy_robust)
