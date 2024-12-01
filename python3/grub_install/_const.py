@@ -77,7 +77,7 @@ class PlatformInstallInfo:
         return "<%s %r>" % (self.__class__.__name__, self.__dict__)
 
 
-class RootfsPartitionOrBootPartitionMountPoint:
+class RootfsOrBootMountPoint:
 
     def __init__(self, disk, partition, mountpoint, fstype, opts, rootfs_partition_or_boot_partition, is_disk_removable):
         assert disk is not None

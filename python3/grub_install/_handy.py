@@ -26,7 +26,7 @@ import pathlib
 import tempfile
 import parted
 import subprocess
-from ._const import PlatformType, RootfsPartitionOrBootPartitionMountPoint
+from ._const import PlatformType, RootfsOrBootMountPoint
 
 
 class Handy:
@@ -271,7 +271,7 @@ class Grub:
 class GrubMountPoint:
 
     def __init__(self, p):
-        assert isinstance(p, RootfsPartitionOrBootPartitionMountPoint)
+        assert isinstance(p, RootfsOrBootMountPoint)
         assert p.partition is not None                                      # disk-only scenario is not supported
 
         self._p = p
