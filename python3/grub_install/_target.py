@@ -261,10 +261,10 @@ class Target:
             force_mkdir(dstDir, clear=True)
             if themes == "*":
                 for tname, fullfn in source.get_all_theme_directories().items():
-                    shutil.copytree(fullfn, os.path.join(dstDir, tname), copy_function=shutil_copy_robust)
+                    shutil.copytree(fullfn, os.path.join(dstDir, tname))
             else:
                 for tname in themes:
-                    shutil.copytree(source.get_theme_directory(tname), dstDir, copy_function=shutil_copy_robust)
+                    shutil.copytree(source.get_theme_directory(tname), dstDir)
 
     def remove_data_files(self):
         assert self._mode in [TargetAccessMode.RW, TargetAccessMode.W]

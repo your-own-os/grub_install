@@ -172,7 +172,7 @@ class Source:
                 if not compare_directories(fullfn, fullfn2):
                     raise CopySourceError("%s and %s are different" % (fullfn, fullfn2))
             else:
-                shutil.copytree(fullfn, fullfn2, copy_function=shutil_copy_robust)
+                shutil.copytree(fullfn, fullfn2)
 
         # copy locale files
         if self.supports(self.CAP_NLS):
@@ -209,4 +209,4 @@ class Source:
                     if not compare_directories(fullfn, fullfn2):
                         raise CopySourceError("%s and %s are different" % (fullfn, fullfn2))
                 else:
-                    shutil.copytree(fullfn, fullfn2, copy_function=shutil_copy_robust)
+                    shutil.copytree(fullfn, fullfn2)
