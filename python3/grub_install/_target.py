@@ -28,7 +28,7 @@ import struct
 import parted
 import pathlib
 import reedsolo
-from ._util import rel_path, force_rm, force_mkdir, rmdir_if_empty, shutil_copy_robust, compare_file_and_content, compare_files, compare_directories, is_buffer_all_zero, PartiUtil
+from ._util import rel_path, force_rm, force_mkdir, rmdir_if_empty, shutil_copy_robust, compare_file_and_content, compare_files, compare_directories, is_buffer_all_zero
 from ._const import TargetType, TargetAccessMode, PlatformType, PlatformInstallInfo
 from ._errors import TargetError, InstallError, CompareWithSourceError
 from ._handy import Handy, Grub, GrubMountPoint
@@ -84,7 +84,7 @@ class Target:
                 for k, v in self._platforms.items():
                     try:
                         if k == PlatformType.I386_PC:
-                            _Bios.fill_platform_install_info_with_mbr(k, v, self._bootDir, self._mnt.disk)
+                            _Bios.fill_platform_install_info_with_mbr(k, v, self._bootDir, self._mnt)
                         elif Handy.isPlatformEfi(k):
                             _Efi.fill_platform_install_info(k, v, self._targetType, self._bootDir)
                         else:
@@ -153,7 +153,7 @@ class Target:
                 _Common.install_platform(self, platform_type, source,
                                          tmpDir=self._tmpDir,
                                          debugImage=kwargs.get("debug_image", None))
-                _Bios.install_with_mbr(platform_type, ret, source, self._bootDir, self._mnt.disk,
+                _Bios.install_with_mbr(platform_type, ret, source, self._bootDir, self._mnt,
                                        False,                                                           # bFloppyOrHdd
                                        kwargs.get("allow_floppy", False),                               # bAllowFloppy
                                        kwargs.get("bpb", True),                                         # bBpb
@@ -201,7 +201,7 @@ class Target:
         # do remove
         if self._targetType == TargetType.MOUNTED_HDD_DEV:
             if platform_type == PlatformType.I386_PC:
-                _Bios.remove_from_mbr(platform_type, self._mnt.disk)
+                _Bios.remove_from_mbr(platform_type, self._mnt)
             elif Handy.isPlatformEfi(platform_type):
                 _Efi.remove_from_efi_dir(platform_type, self._bootDir)
             else:
@@ -497,14 +497,14 @@ class _Bios:
         platform_install_info.rs_codes = True
 
     @classmethod
-    def fill_platform_install_info_with_mbr(cls, platform_type, platform_install_info, bootDir, dev):
+    def fill_platform_install_info_with_mbr(cls, platform_type, platform_install_info, bootDir, mnt):
         bootBuf = bytearray(cls._checkAndReadBootImg(platform_type, bootDir, TargetError))     # bootBuf needs to be writable
         coreBuf = cls._checkAndReadCoreImg(platform_type, bootDir, TargetError)
 
         # read MBR and MBR-gap
         tmpBootBuf, tmpRestBuf = None, None
-        cls._checkDisk(dev, TargetError)
-        with open(dev, "rb") as f:
+        cls._checkDisk(mnt, TargetError)
+        with open(mnt.disk, "rb") as f:
             tmpBootBuf = f.read(len(bootBuf))
             tmpRestBuf = f.read(cls._getCoreBufMaxSize() - len(bootBuf))
 
@@ -570,7 +570,7 @@ class _Bios:
         platform_install_info.rs_codes = False
 
     @classmethod
-    def install_with_mbr(cls, platform_type, platform_install_info, source, bootDir, dev, bFloppyOrHdd, bAllowFloppy, bBpb, bAddRsCodes):
+    def install_with_mbr(cls, platform_type, platform_install_info, source, bootDir, mnt, bFloppyOrHdd, bAllowFloppy, bBpb, bAddRsCodes):
         assert not bFloppyOrHdd and not bAllowFloppy        # FIXME
 
         # copy boot.img
@@ -578,9 +578,9 @@ class _Bios:
 
         bootBuf = bytearray(cls._checkAndReadBootImg(platform_type, bootDir, InstallError))     # bootBuf needs to be writable
         coreBuf = cls._checkAndReadCoreImg(platform_type, bootDir, InstallError)
-        cls._checkDisk(dev, InstallError)
+        cls._checkDisk(mnt, InstallError)
 
-        with open(dev, "rb+") as f:
+        with open(mnt.disk, "rb+") as f:
             tmpBootBuf = f.read(len(bootBuf))
 
             # prepare bootBuf
@@ -621,10 +621,10 @@ class _Bios:
         platform_install_info.rs_codes = bAddRsCodes
 
     @classmethod
-    def remove_from_mbr(cls, platform_type, dev):
-        cls._checkDisk(dev, None)
+    def remove_from_mbr(cls, platform_type, mnt):
+        cls._checkDisk(mnt, None)
 
-        with open(dev, "rb+") as f:
+        with open(mnt.disk, "rb+") as f:
             # prepare allZeroBootBuf
             tmpBootBuf = f.read(Grub.DISK_SECTOR_SIZE)
             allZeroBootBuf = cls._getAllZeroBootBuf(tmpBootBuf)
@@ -661,29 +661,19 @@ class _Bios:
         return (len(coreBuf) + Grub.DISK_SECTOR_SIZE - 1) // Grub.DISK_SECTOR_SIZE * Grub.DISK_SECTOR_SIZE * 2
 
     @classmethod
-    def _checkDisk(cls, dev, exceptionClass):
-        if not PartiUtil.isDiskOrParti(dev):
+    def _checkDisk(cls, mnt, exceptionClass):
+        if mnt.grub_partmap != "msdos":
             if exceptionClass is not None:
-                raise exceptionClass("'%s' must be a disk" % (dev))
+                raise exceptionClass("'%s' must have a MBR partition table" % (mnt.disk))
             else:
                 assert False
 
-        pDev = parted.getDevice(dev)
+        pDev = parted.getDevice(mnt.disk)
         pDisk = parted.newDisk(pDev)
-        if pDisk.type != "msdos":
-            if exceptionClass is not None:
-                raise exceptionClass("'%s' must have a MBR partition table" % (dev))
-            else:
-                assert False
         pPartiList = pDisk.getPrimaryPartitions()
-        if len(pPartiList) == 0:
-            if exceptionClass is not None:
-                raise exceptionClass("'%s' have no partition" % (dev))
-            else:
-                assert False
         if pPartiList[0].geometry.start * pDev.sectorSize < cls._getCoreBufMaxSize():
             if exceptionClass is not None:
-                raise exceptionClass("'%s' has no MBR gap or its MBR gap is too small" % (dev))
+                raise exceptionClass("'%s' has no MBR gap or its MBR gap is too small" % (mnt.disk))
             else:
                 assert False
 

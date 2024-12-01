@@ -24,8 +24,8 @@
 import os
 import pathlib
 import tempfile
+import parted
 import subprocess
-from ._util import get_partition_type
 from ._const import PlatformType, RootfsPartitionOrBootPartitionMountPoint
 
 
@@ -288,8 +288,7 @@ class GrubMountPoint:
         else:
             self._grub_fs = self._p.fstype
 
-        # FIXME: what if filesystem is on raw block device
-        self._grub_partmap = get_partition_type(self._p.disk)
+        self._grub_partmap = parted.newDisk(parted.getDevice(self._p.disk)).type
 
         self._grub_bios_hints = __getGrub("bios_hints") if not self._p.is_disk_removable() else ""
 

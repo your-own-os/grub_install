@@ -80,7 +80,7 @@ class PlatformInstallInfo:
 class RootfsPartitionOrBootPartitionMountPoint:
 
     def __init__(self, disk, partition, mountpoint, fstype, opts, rootfs_partition_or_boot_partition, is_disk_removable):
-        assert disk != partition
+        assert disk != partition        # FIXME: in future we may support disk-only scenarios
 
         self._disk = disk
         self._partition = partition

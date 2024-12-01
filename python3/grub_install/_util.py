@@ -22,26 +22,14 @@
 
 
 import os
-import re
 import shutil
 import pathlib
 import filecmp
-import subprocess
 
 
 def rel_path(baseDir, path):
     assert path.startswith(baseDir)
     return os.path.relpath(path, baseDir)
-
-
-def get_partition_type(diskDevPath):
-    m2 = re.search(r'(^| )PTTYPE="(\S+)"', subprocess.check_output(["blkid", diskDevPath], text=True), re.M)
-    if m2.group(2) == "dos":
-        return "msdos"
-    elif m2.group(2) == "gpt":
-        return "gpt"
-    else:
-        assert False
 
 
 def force_rm(path):
@@ -126,79 +114,3 @@ def is_buffer_all_zero(buf):
         if b != 0:
             return False
     return True
-
-
-class PartiUtil:
-
-    @staticmethod
-    def isDiskOrParti(devPath):
-        if re.fullmatch("/dev/sd[a-z]", devPath) is not None:
-            return True
-        if re.fullmatch("(/dev/sd[a-z])([0-9]+)", devPath) is not None:
-            return False
-        if re.fullmatch("/dev/xvd[a-z]", devPath) is not None:
-            return True
-        if re.fullmatch("(/dev/xvd[a-z])([0-9]+)", devPath) is not None:
-            return False
-        if re.fullmatch("/dev/vd[a-z]", devPath) is not None:
-            return True
-        if re.fullmatch("(/dev/vd[a-z])([0-9]+)", devPath) is not None:
-            return False
-        if re.fullmatch("/dev/nvme[0-9]+n[0-9]+", devPath) is not None:
-            return True
-        if re.fullmatch("(/dev/nvme[0-9]+n[0-9]+)p([0-9]+)", devPath) is not None:
-            return False
-        assert False
-
-    @staticmethod
-    def partiToDiskAndPartiId(partitionDevPath):
-        m = re.fullmatch("(/dev/sd[a-z])([0-9]+)", partitionDevPath)
-        if m is not None:
-            return (m.group(1), int(m.group(2)))
-        m = re.fullmatch("(/dev/xvd[a-z])([0-9]+)", partitionDevPath)
-        if m is not None:
-            return (m.group(1), int(m.group(2)))
-        m = re.fullmatch("(/dev/vd[a-z])([0-9]+)", partitionDevPath)
-        if m is not None:
-            return (m.group(1), int(m.group(2)))
-        m = re.fullmatch("(/dev/nvme[0-9]+n[0-9]+)p([0-9]+)", partitionDevPath)
-        if m is not None:
-            return (m.group(1), int(m.group(2)))
-        assert False
-
-    @staticmethod
-    def partiToDisk(partitionDevPath):
-        return PartiUtil.partiToDiskAndPartiId(partitionDevPath)[0]
-
-    @staticmethod
-    def diskToParti(diskDevPath, partitionId):
-        m = re.fullmatch("/dev/sd[a-z]", diskDevPath)
-        if m is not None:
-            return diskDevPath + str(partitionId)
-        m = re.fullmatch("/dev/xvd[a-z]", diskDevPath)
-        if m is not None:
-            return diskDevPath + str(partitionId)
-        m = re.fullmatch("/dev/vd[a-z]", diskDevPath)
-        if m is not None:
-            return diskDevPath + str(partitionId)
-        m = re.fullmatch("/dev/nvme[0-9]+n[0-9]+", diskDevPath)
-        if m is not None:
-            return diskDevPath + "p" + str(partitionId)
-        assert False
-
-    @staticmethod
-    def diskHasParti(diskDevPath, partitionId):
-        partiDevPath = PartiUtil.diskToParti(diskDevPath, partitionId)
-        return os.path.exists(partiDevPath)
-
-    @staticmethod
-    def diskHasMoreParti(diskDevPath, partitionId):
-        for fn in os.listdir("/dev"):
-            m = re.fullmatch(os.path.basename(diskDevPath) + "([0-9]+)", fn)
-            if m is not None and int(m.group(1)) > partitionId:
-                return True
-        return False
-
-    @staticmethod
-    def partiExists(partitionDevPath):
-        return os.path.exists(partitionDevPath)
