@@ -26,11 +26,22 @@ import re
 import shutil
 import pathlib
 import filecmp
+import subprocess
 
 
 def rel_path(baseDir, path):
     assert path.startswith(baseDir)
     return os.path.relpath(path, baseDir)
+
+
+def get_partition_type(diskDevPath):
+    m2 = re.search(r'(^| )PTTYPE="(\S+)"', subprocess.check_output(["blkid", diskDevPath], text=True), re.M)
+    if m2.group(2) == "dos":
+        return "msdos"
+    elif m2.group(2) == "gpt":
+        return "gpt"
+    else:
+        assert False
 
 
 def force_rm(path):

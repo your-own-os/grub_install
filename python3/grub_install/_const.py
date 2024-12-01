@@ -79,7 +79,7 @@ class PlatformInstallInfo:
 
 class RootfsPartitionOrBootPartitionMountPoint:
 
-    def __init__(self, disk, partition, mountpoint, fstype, opts, rootfs_partition_or_boot_partition):
+    def __init__(self, disk, partition, mountpoint, fstype, opts, rootfs_partition_or_boot_partition, is_disk_removable):
         assert disk != partition
 
         self._disk = disk
@@ -88,6 +88,7 @@ class RootfsPartitionOrBootPartitionMountPoint:
         self._fstype = fstype
         self._opts = opts
         self._rootfsOrBoot = rootfs_partition_or_boot_partition
+        self._isRemovable = is_disk_removable
 
     @property
     def disk(self):
@@ -114,6 +115,9 @@ class RootfsPartitionOrBootPartitionMountPoint:
 
     def is_boot_mount_point(self):
         return not self._rootfsOrBoot
+
+    def is_disk_removable(self):
+        return self._isRemovable
 
 
 #    MOUNTED_FDD_DEV = enum.auto()            # floppy device

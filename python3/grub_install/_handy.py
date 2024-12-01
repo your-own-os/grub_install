@@ -25,6 +25,7 @@ import os
 import pathlib
 import tempfile
 import subprocess
+from ._util import get_partition_type
 from ._const import PlatformType, RootfsPartitionOrBootPartitionMountPoint
 
 
@@ -282,14 +283,17 @@ class GrubMountPoint:
 
         self._fs_uuid = __getGrub("fs_uuid")
 
-        self._grub_fs = __getGrub("fs")
+        if self._p.fstype == "vfat":
+            self._grub_fs = "fat"
+        else:
+            self._grub_fs = self._p.fstype
 
         # FIXME: what if filesystem is on raw block device
-        self._grub_partmap = __getGrub("partmap")
+        self._grub_partmap = get_partition_type(self._p.disk)
 
-        self._grub_bios_hints = __getGrub("bios_hints")
+        self._grub_bios_hints = __getGrub("bios_hints") if not self._p.is_disk_removable() else ""
 
-        self._grub_efi_hints = __getGrub("efi_hints")
+        self._grub_efi_hints = __getGrub("efi_hints") if not self._p.is_disk_removable() else ""
 
     @property
     def fs_uuid(self):
