@@ -272,6 +272,7 @@ class GrubMountPoint:
 
     def __init__(self, p):
         assert isinstance(p, RootfsPartitionOrBootPartitionMountPoint)
+        assert p.partition is not None                                      # disk-only scenario is not supported
 
         self._p = p
 

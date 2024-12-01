@@ -54,11 +54,15 @@ class Target:
             if bootMnt is not None:
                 assert bootMnt.is_boot_mount_point()
             if bootMnt is not None:
+                if bootMnt.partition is None:
+                    raise TargetError("boot_mount_point must be a partition")
                 if rootfsMnt is not None:
                     assert os.path.join(rootfsMnt.mountpoint, "boot") == bootMnt.mountpoint
                 self._mnt = GrubMountPoint(bootMnt)
                 self._bootDir = self._mnt.mountpoint
             elif rootfsMnt is not None:
+                if rootfsMnt.partition is None:
+                    raise TargetError("rootfs_mount_point must be a partition")
                 self._mnt = GrubMountPoint(rootfsMnt)
                 self._bootDir = os.path.join(self._mnt.mountpoint, "boot")
                 if not os.path.exists(self._bootDir):
