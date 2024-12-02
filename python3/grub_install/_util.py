@@ -71,18 +71,6 @@ def rmdir_if_empty(path):
             os.rmdir(path)
 
 
-def shutil_copy_robust(*kargs, **kwargs):
-    # FIXME: this is because fusefat does not support chmod, maybe we should modify fusefat
-    try:
-        shutil.copy(*kargs, **kwargs)
-    except OSError as e:
-        if e.errno == 38:
-            # target filesystem does not support chmod operation
-            pass
-        else:
-            raise
-
-
 def compare_file_and_content(filepath, content):
     if isinstance(content, str):
         return pathlib.Path(filepath).read_text() == content
