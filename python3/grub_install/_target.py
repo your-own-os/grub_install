@@ -194,40 +194,6 @@ class Target:
 
         self._platforms[platform_type] = ret
 
-    def remove_platform(self, platform_type):
-        assert self._mode in [TargetAccessMode.RW, TargetAccessMode.W]
-        assert isinstance(platform_type, PlatformType)
-
-        # do nothing if the specified platform does not exists
-        if platform_type not in self._platforms:
-            return
-
-        # do remove
-        if self._targetType == TargetType.MOUNTED_HDD_DEV:
-            if platform_type == PlatformType.I386_PC:
-                _Bios.remove_from_mbr(platform_type, self._mnt)
-            elif Handy.isPlatformEfi(platform_type):
-                _Efi.remove_from_efi_dir(platform_type, self._bootDir)
-            else:
-                assert False
-            _Common.remove_platform(self, platform_type)
-        elif self._targetType == TargetType.PYCDLIB_OBJ:
-            # FIXME
-            assert False
-        elif self._targetType == TargetType.ISO_DIR:
-            if platform_type == PlatformType.I386_PC:
-                pass
-            elif Handy.isPlatformEfi(platform_type):
-                _Efi.remove_from_efi_dir(platform_type, self._bootDir)
-            else:
-                assert False
-            _Common.remove_platform(self, platform_type)
-        else:
-            assert False
-
-        # delete PlatformInstallInfo object
-        del self._platforms[platform_type]
-
     def install_data_files(self, source, locales=None, fonts=None, themes=None):
         assert self._mode in [TargetAccessMode.RW, TargetAccessMode.W]
         if locales is not None:
@@ -270,33 +236,6 @@ class Target:
                 for tname in themes:
                     shutil.copytree(source.get_theme_directory(tname), dstDir)
 
-    def remove_data_files(self):
-        assert self._mode in [TargetAccessMode.RW, TargetAccessMode.W]
-
-        grubDir = os.path.join(self._bootDir, "grub")
-        force_rm(os.path.join(grubDir, "locale"))
-        force_rm(os.path.join(grubDir, "fonts"))
-        force_rm(os.path.join(grubDir, "themes"))
-
-    def remove_all(self):
-        assert self._mode in [TargetAccessMode.RW, TargetAccessMode.W]
-
-        # remove platforms, some platform needs special processing
-        for k in list(self._platforms.keys()):
-            self.remove_platform(k)
-
-        # remove remaining files
-        if self._targetType == TargetType.MOUNTED_HDD_DEV:
-            _Efi.remove_remaining_crufts(self._bootDir)
-        elif self._targetType == TargetType.PYCDLIB_OBJ:
-            # FIXME
-            assert False
-        elif self._targetType == TargetType.ISO_DIR:
-            _Efi.remove_remaining_crufts(self._bootDir)
-        else:
-            assert False
-        _Common.remove_remaining_crufts(self)
-
     def compare_with_source(self, source):
         assert self._mode in [TargetAccessMode.R, TargetAccessMode.RW]
         assert isinstance(source, Source)
@@ -325,6 +264,67 @@ class Target:
                 assert False
 
         _Common.check_data(self, source)
+
+    def remove_platform(self, platform_type):
+        assert self._mode in [TargetAccessMode.RW, TargetAccessMode.W]
+        assert isinstance(platform_type, PlatformType)
+
+        # do nothing if the specified platform does not exists
+        if platform_type not in self._platforms:
+            return
+
+        # do remove
+        if self._targetType == TargetType.MOUNTED_HDD_DEV:
+            if platform_type == PlatformType.I386_PC:
+                _Bios.remove_from_mbr(platform_type, self._mnt)
+            elif Handy.isPlatformEfi(platform_type):
+                _Efi.remove_from_efi_dir(platform_type, self._bootDir)
+            else:
+                assert False
+            _Common.remove_platform(self, platform_type)
+        elif self._targetType == TargetType.PYCDLIB_OBJ:
+            # FIXME
+            assert False
+        elif self._targetType == TargetType.ISO_DIR:
+            if platform_type == PlatformType.I386_PC:
+                pass
+            elif Handy.isPlatformEfi(platform_type):
+                _Efi.remove_from_efi_dir(platform_type, self._bootDir)
+            else:
+                assert False
+            _Common.remove_platform(self, platform_type)
+        else:
+            assert False
+
+        # delete PlatformInstallInfo object
+        del self._platforms[platform_type]
+
+    def remove_data_files(self):
+        assert self._mode in [TargetAccessMode.RW, TargetAccessMode.W]
+
+        grubDir = os.path.join(self._bootDir, "grub")
+        force_rm(os.path.join(grubDir, "locale"))
+        force_rm(os.path.join(grubDir, "fonts"))
+        force_rm(os.path.join(grubDir, "themes"))
+
+    def remove_all(self):
+        assert self._mode in [TargetAccessMode.RW, TargetAccessMode.W]
+
+        # remove platforms, some platform needs special processing
+        for k in list(self._platforms.keys()):
+            self.remove_platform(k)
+
+        # remove remaining files
+        if self._targetType == TargetType.MOUNTED_HDD_DEV:
+            _Efi.remove_remaining_crufts(self._bootDir)
+        elif self._targetType == TargetType.PYCDLIB_OBJ:
+            # FIXME
+            assert False
+        elif self._targetType == TargetType.ISO_DIR:
+            _Efi.remove_remaining_crufts(self._bootDir)
+        else:
+            assert False
+        _Common.remove_remaining_crufts(self)
 
 
 class _Common:
