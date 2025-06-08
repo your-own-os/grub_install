@@ -81,7 +81,7 @@ class RootfsOrBootMountPoint:
 
     def __init__(self, disk, partition, mountpoint, fstype, opts, rootfs_partition_or_boot_partition, is_disk_removable):
         assert disk is not None
-        assert disk != partition                # "mountpoint" maps to "disk" if "partition" is None
+        assert partition != disk                # "mountpoint" maps to "disk" if "partition" is None
         assert mountpoint is not None
         assert fstype is not None
         assert opts is not None
