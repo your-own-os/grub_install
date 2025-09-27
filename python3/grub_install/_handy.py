@@ -286,6 +286,8 @@ class GrubMountPoint:
 
         if self._p.fstype == "vfat":
             self._grub_fs = "fat"
+        elif self._p.fstype in ["ext2", "ext3", "ext4"]:
+            self._grub_fs = "ext2"
         else:
             self._grub_fs = self._p.fstype
 
