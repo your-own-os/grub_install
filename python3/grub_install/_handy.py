@@ -284,9 +284,12 @@ class GrubMountPoint:
 
         self._fs_uuid = __getGrub("fs_uuid")
 
-        if self._p.fstype == "vfat":
+        # here we don't consider fuse fstype
+        if self._p.fstype in ["msdos", "vfat"]:
             self._grub_fs = "fat"
-        elif self._p.fstype in ["ext2", "ext3", "ext4"]:
+        elif self._p.fstype == "ntfs3":
+            self._grub_fs = "ntfs"
+        elif self._p.fstype in ["ext3", "ext4"]:
             self._grub_fs = "ext2"
         else:
             self._grub_fs = self._p.fstype
