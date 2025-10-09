@@ -43,6 +43,7 @@ class Target:
 
         self._targetType = target_type
         self._mode = target_access_mode
+        self._bootDir = kwargs.get("boot_dir", "boot")
         self._tmpDir = kwargs.get("tmp_work_dir", None)
 
         # target specific variables
@@ -57,14 +58,14 @@ class Target:
                 if bootMnt.partition is None:
                     raise TargetError("boot_mount_point must be a partition")
                 if rootfsMnt is not None:
-                    assert os.path.join(rootfsMnt.mountpoint, "boot") == bootMnt.mountpoint
+                    assert os.path.join(rootfsMnt.mountpoint, self._bootDir) == bootMnt.mountpoint
                 self._mnt = GrubMountPoint(bootMnt)
                 self._bootDir = self._mnt.mountpoint
             elif rootfsMnt is not None:
                 if rootfsMnt.partition is None:
                     raise TargetError("rootfs_mount_point must be a partition")
                 self._mnt = GrubMountPoint(rootfsMnt)
-                self._bootDir = os.path.join(self._mnt.mountpoint, "boot")
+                self._bootDir = os.path.join(self._mnt.mountpoint, self._bootDir)
                 if not os.path.exists(self._bootDir):
                     raise TargetError("boot directory \"%s\" does not exist" % (self._bootDir))
             else:
@@ -73,10 +74,10 @@ class Target:
                 raise TargetError("no fsuuid found")
         elif self._targetType == TargetType.PYCDLIB_OBJ:
             assert self._mode in [TargetAccessMode.R, TargetAccessMode.W]
-            self._iso = kwargs.get["obj"]
+            self._iso = kwargs["obj"]
         elif self._targetType == TargetType.ISO_DIR:
             self._dir = kwargs["dir"]
-            self._bootDir = os.path.join(self._dir, "boot")
+            self._bootDir = os.path.join(self._dir, self._bootDir)
         else:
             assert False
 
